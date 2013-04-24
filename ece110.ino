@@ -1,6 +1,6 @@
-#define WHITE 1000 //find value  
-#define GREY 700 //find value
-#define BLACK 200 
+#define WHITE 670 //find value  
+#define GREY 250 //find value
+#define BLACK 100 
 
 //Actuation Control Ports
 //output
@@ -48,25 +48,22 @@ void loop() {
   Serial.println(analogRead(l_grey));
   Serial.print("right grey: ");
   Serial.println(analogRead(r_grey));
-  Serial.print("left strip");
+  Serial.print("left strip: ");
   Serial.println(analogRead(l_strip));
-  Serial.print("right strip");
+  Serial.print("right strip: ");
   Serial.println(analogRead(r_strip)); 
       
   if(val_test)
+  { 
+    delay(100); 
     return;    
-  
+  }
   //add stop condition
   if(stop())
   {
     drive(0,0);
     Serial.println("stopped");
     return;  
-  }
-  //test for if sensors see white
-  if(state != normal && is_white(l_tape_follow) && is_white(r_tape_follow))
-  {
-     digitalWrite(3, HIGH); 
   }
   //returns to normal after turning
   if(is_white(l_tape_follow) && is_white(r_tape_follow) && is_black(l_grey)&& is_black(r_grey) && state != normal)
@@ -85,11 +82,6 @@ void loop() {
   //watches for intersection
   if(state == normal && is_grey(l_tape_follow) && is_grey(r_tape_follow))
   {
-    while(1) {
-      Serial.println("intersection detected");
-      drive(0,0);
-      delay(100);
-    }
     //if both sensors read grey, check the value of the strip variables
     if(is_grey(l_grey) && is_grey(r_grey))
     {
@@ -124,27 +116,13 @@ void loop() {
   switch(state)
   {
     case normal:
-      /*if(is_white(l_tape_follow) && is_white(r_tape_follow))
-      {
-        drive(255,255);
-      }
-      else if(is_white(l_tape_follow) && is_black(r_tape_follow))
-      {
-        drive(-60, 255); 
-      } 
-      else if(is_black(l_tape_follow) && is_white(r_tape_follow))
-      {
-        drive(255,-60);
-      }
-      else
-        drive(0,0);*/
       l_sensor_val = analogRead(l_tape_follow);
       r_sensor_val = analogRead(r_tape_follow);
-      drive(map(r_sensor_val, 0, 255, 0, 1023)/2,map(l_sensor_val, 0, 255, 0 ,1023)/2);
+      drive(map(r_sensor_val, 0, 255, 0, 1023)/4,map(l_sensor_val, 0, 255, 0 ,1023)/4);
       Serial.println("in normal");
       break;
     case cw:
-      drive(150, -130);
+      drive(230, -200);
       /*
       drive(150, -150);
       delay(900);
@@ -152,7 +130,7 @@ void loop() {
       Serial.println("in cw");
       break;
     case ccw:
-      drive(-130, 150);
+      drive(-200, 230);
       /*
       drive(-150, 150);
       delay(900);
@@ -182,7 +160,7 @@ void drive(int l_power, int r_power)
 
 bool stop()
 {
-  return (is_white(r_strip) && is_white(r_grey) && is_white(r_tape_follow));
+  return (is_white(r_grey) && is_white(r_tape_follow) && is_white(l_tape_follow) && is_white(l_strip));
 }
 //tweak with numbers
 bool is_grey(int sensor_port)

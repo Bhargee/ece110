@@ -1,6 +1,6 @@
-#define WHITE 670 //find value  
-#define GREY 250 //find value
-#define BLACK 100 
+#define WHITE 950 //find value  
+#define GREY 200 //find value
+#define BLACK 200 
 
 //Actuation Control Ports
 //output
@@ -18,7 +18,7 @@ int r_strip = A5;
 //more state control constants
 enum robot_op {normal, cw, ccw};
 robot_op state = normal;
-bool val_test = true;
+bool debug_mode = false;
 bool l_strip_d = false;
 bool r_strip_d = false;
 
@@ -53,7 +53,7 @@ void loop() {
   Serial.print("right strip: ");
   Serial.println(analogRead(r_strip)); 
       
-  if(val_test)
+  if(debug_mode)
   { 
     delay(100); 
     return;    
@@ -65,19 +65,14 @@ void loop() {
     Serial.println("stopped");
     return;  
   }
-  //returns to normal after turning
-  if(is_white(l_tape_follow) && is_white(r_tape_follow) && is_black(l_grey)&& is_black(r_grey) && state != normal)
-  {
-    drive(0,0);
-    state = normal;
-    Serial.println("returned to normal state after turning");
-  }
-  
   //watches for directional strips
-  if(is_white(l_strip))
+  if(is_white(l_strip) && state == normal)
     l_strip_d = true;
-  if(is_white(r_strip))
+  if(is_white(r_strip) && state == normal)
     r_strip = true;
+    
+  if(l_strip_d) Serial.println("left strip was detected");
+  if(r_strip_d) Serial.println("right strip was detected");
   
   //watches for intersection
   if(state == normal && is_grey(l_tape_follow) && is_grey(r_tape_follow))
@@ -110,9 +105,13 @@ void loop() {
     {
       state = cw;
     }
+    
+    l_strip_d = false;
+    r_strip_d = false;
   } 
   int l_sensor_val;
   int r_sensor_val;  
+  int delay_count = 0;
   switch(state)
   {
     case normal:
@@ -122,19 +121,45 @@ void loop() {
       Serial.println("in normal");
       break;
     case cw:
-      drive(230, -200);
-      /*
-      drive(150, -150);
-      delay(900);
-      */
+      drive(255,255);
+      delay(100);
+      drive(255, -255);
+      delay_count = 0;
+      while(delay_count < 20)
+      {
+        if(is_white(l_tape_follow) && is_white(r_tape_follow) && (is_black(l_grey) || is_black(r_grey)))
+        {
+          delay_count = 20;
+        }
+        else
+        {
+          delay(100);
+          delay_count++;
+        }
+      }
+      drive(0,0);
+      state = normal;
       Serial.println("in cw");
       break;
     case ccw:
-      drive(-200, 230);
-      /*
-      drive(-150, 150);
-      delay(900);
-      */
+      drive(255,255);
+      delay(100);
+      drive(-255, 255);
+      delay_count = 0;
+      while(delay_count < 20)
+      {
+        if(is_white(l_tape_follow) && is_white(r_tape_follow) && (is_black(l_grey) || is_black(r_grey)))
+        {
+          delay_count = 20;
+        }
+        else
+        {
+          delay(100);
+          delay_count++;
+        }
+      }
+      drive(0,0);
+      state = normal;
       Serial.println("in ccw");
       break;
   }
@@ -166,7 +191,7 @@ bool stop()
 bool is_grey(int sensor_port)
 {
   int sensor_val = analogRead(sensor_port);
-  return (sensor_val >= GREY && sensor_val < WHITE);
+  return (sensor_val > BLACK && sensor_val < WHITE);
 }
 
 bool is_white(int sensor_port)

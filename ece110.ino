@@ -58,7 +58,7 @@ void loop() {
     delay(100); 
     return;    
   }
-  //add stop condition
+
   if(stop())
   {
     drive(0,0);
@@ -66,14 +66,11 @@ void loop() {
     return;  
   }
   //watches for directional strips
-  if(is_white(l_strip) && state == normal)
+  if(state == normall && is_white(l_strip))
     l_strip_d = true;
-  if(is_white(r_strip) && state == normal)
+  if(state == normal && is_white(r_strip))
     r_strip = true;
-    
-  if(l_strip_d) Serial.println("left strip was detected");
-  if(r_strip_d) Serial.println("right strip was detected");
-  
+ 
   //watches for intersection
   if(state == normal && is_grey(l_tape_follow) && is_grey(r_tape_follow))
   {

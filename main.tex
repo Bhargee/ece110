@@ -1,0 +1,33 @@
+\documentclass[12pt]{report}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\title{ECE 110 Final Lab Project}
+\author{
+  Bhargava Manja
+  \and
+  Robert McDonald
+}
+
+\begin{document}
+\maketitle
+
+\section*{Introduction}
+The goal of the ECE 110 final lab project is to design, implement, test, and
+debug an autonomous vehicle that, using infrared sensors, can acurately follow
+a track. Students had the option of designing and implementing a car that
+utilized TTL circuit logic or one that used an Arduino micrcontroller. We decided to use an Arduino microcontroller (specifically the Arduino Micro board) for
+the sake of simplicity and ease. We were more familiar with the programming
+concepts that an Arduino based design required. Using an Arduino and two H-bridges, we have succesfully implemented an autonomous vehicle that follows a grid,
+only turning when the car's sensors detect grey tape. The design also incorporates an element of state remembrance, as it correctly implements turns on T and cross intersections by ``remembering'' turn indicators placed several inches away
+from such intersections.
+
+\section*{Documentation of Design}
+@TODO
+\section*{Design Philosophy}
+\subsection*{Navigation Strategy}
+
+\end{document}

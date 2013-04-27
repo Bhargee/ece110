@@ -1,4 +1,4 @@
-#define WHITE 950 //find value  
+#define WHITE 870 //find value  
 #define GREY 200 //find value
 #define BLACK 200 
 
@@ -16,7 +16,7 @@ int r_grey = A3;
 int l_strip = A4;
 int r_strip = A5;
 //more state control constants
-enum robot_op {normal, cw, ccw};
+enum robot_op {normal, cw, ccw, halt};
 robot_op state = normal;
 bool debug_mode = false;
 bool l_strip_d = false;
@@ -51,8 +51,13 @@ void loop() {
   Serial.print("left strip: ");
   Serial.println(analogRead(l_strip));
   Serial.print("right strip: ");
-  Serial.println(analogRead(r_strip)); 
-      
+  Serial.println(analogRead(r_strip));
+  Serial.print("left strip detetcted: ");
+  Serial.println(l_strip_d);
+  Serial.print("right strip detected: ");
+  Serial.println(r_strip_d);  
+  //in debug mode, car ONLY prints out debug statements above,
+  //used for calibration
   if(debug_mode)
   { 
     delay(100); 
@@ -61,12 +66,10 @@ void loop() {
 
   if(stop())
   {
-    drive(0,0);
-    Serial.println("stopped");
-    return;  
+    state = halt;
   }
   //watches for directional strips
-  if(state == normall && is_white(l_strip))
+  if(state == normal && is_white(l_strip))
     l_strip_d = true;
   if(state == normal && is_white(r_strip))
     r_strip = true;
@@ -114,15 +117,15 @@ void loop() {
     case normal:
       l_sensor_val = analogRead(l_tape_follow);
       r_sensor_val = analogRead(r_tape_follow);
-      drive(map(r_sensor_val, 0, 255, 0, 1023)/4,map(l_sensor_val, 0, 255, 0 ,1023)/4);
+      drive(map(r_sensor_val, 0, 255, 0, 1023)/3,map(l_sensor_val, 0, 255, 0 ,1023)/3);
       Serial.println("in normal");
       break;
     case cw:
       drive(255,255);
-      delay(100);
+      delay(150);
       drive(255, -255);
       delay_count = 0;
-      while(delay_count < 20)
+      while(delay_count < 10)
       {
         if(is_white(l_tape_follow) && is_white(r_tape_follow) && (is_black(l_grey) || is_black(r_grey)))
         {
@@ -140,10 +143,10 @@ void loop() {
       break;
     case ccw:
       drive(255,255);
-      delay(100);
+      delay(150);
       drive(-255, 255);
       delay_count = 0;
-      while(delay_count < 20)
+      while(delay_count < 10)
       {
         if(is_white(l_tape_follow) && is_white(r_tape_follow) && (is_black(l_grey) || is_black(r_grey)))
         {
@@ -159,6 +162,9 @@ void loop() {
       state = normal;
       Serial.println("in ccw");
       break;
+    case halt:
+      drive(0,0);
+      return;
   }
   delay(20);
         
